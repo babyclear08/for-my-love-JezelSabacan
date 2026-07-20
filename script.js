@@ -1,3 +1,31 @@
+// Mobile Detection
+function detectMobileDevice() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|phone/i;
+    const isMobile = mobileRegex.test(userAgent.toLowerCase());
+    const isSmallScreen = window.innerWidth <= 768;
+    const isTouchDevice = () => {
+        return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+    };
+    return isMobile || (isSmallScreen && isTouchDevice());
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    const isMobileDevice = detectMobileDevice();
+    const desktopBlock = document.getElementById('desktopBlock');
+    const mobileContent = document.getElementById('mobileContent');
+    
+    if (isMobileDevice) {
+        desktopBlock.classList.add('hidden');
+        mobileContent.classList.remove('hidden');
+        initializeWebsite();
+    } else {
+        desktopBlock.classList.remove('hidden');
+        mobileContent.classList.add('hidden');
+    }
+});
+
 // Global State
 let currentSection = 1;
 let selectedDate = '';
@@ -6,7 +34,6 @@ let selectedLocation = '';
 let musicStarted = false;
 const audio = document.getElementById('bgMusic');
 
-// Love Letter Text
 const loveLetterText = `My Dearest Jezel,
 
 I know life hasn't been easy lately.
@@ -37,41 +64,123 @@ Forever yours,
 
 Baby Clear Jong ❤️`;
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
+function initializeWebsite() {
+    setupEventListeners();
+    createActivityGrid();
+    createLocationGrid();
     initializeBackgroundElements();
     loadFromLocalStorage();
-});
-
-// Start Journey - Play Music and Go to Section 2
-function startJourney() {
-    if (!musicStarted) {
-        audio.play().catch(err => console.log('Auto-play prevented'));
-        musicStarted = true;
-    }
-    goToSection(2);
 }
 
-// Navigate to Section
-function goToSection(sectionNumber) {
-    // Hide current section
-    const currentSectionElement = document.getElementById(`section${currentSection}`);
-    if (currentSectionElement) {
-        currentSectionElement.classList.remove('active');
+function setupEventListeners() {
+    // Section buttons
+    document.querySelectorAll('[data-section]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const section = parseInt(this.getAttribute('data-section'));
+            if (this.getAttribute('data-section') === '2') {
+                startJourney();
+            } else {
+                goToSection(section);
+            }
+        });
+    });
+
+    // Special handlers
+    document.getElementById('dateBtn').addEventListener('click', validateDateAndContinue);
+    document.getElementById('noBtn').addEventListener('click', moveNoButton);
+    document.getElementById('noBtn').addEventListener('touchstart', moveNoButton);
+    document.getElementById('otherActivityBtn').addEventListener('click', toggleOtherInput);
+    document.getElementById('confirmOther').addEventListener('click', selectActivityOther);
+    document.getElementById('finalBtn').addEventListener('click', finalCelebration);
+    document.getElementById('activityContinue').addEventListener('click', function() {
+        goToSection(8);
+    });
+    document.getElementById('locationContinue').addEventListener('click', function() {
+        goToSection(9);
+    });
+}
+
+function createActivityGrid() {
+    const activities = [
+        '🍝 Romantic Dinner',
+        '☕ Coffee Date',
+        '🎬 Movie Date',
+        '🌅 Sunset Walk',
+        '🌊 Beach Date',
+        '🍕 Food Trip',
+        '🚗 Road Trip',
+        '🎳 Bowling',
+        '🎁 Surprise Me',
+        '✍️ Other'
+    ];
+    
+    const grid = document.getElementById('activityGrid');
+    grid.innerHTML = '';
+    
+    activities.forEach((activity, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'activity-card';
+        btn.textContent = activity;
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (activity === '✍️ Other') {
+                toggleOtherInput();
+            } else {
+                selectActivity(activity);
+            }
+        });
+        grid.appendChild(btn);
+    });
+}
+
+function createLocationGrid() {
+    const locations = [
+        '❤️ Zaycoland Resort & Hotel',
+        '☕ Coffee Shop',
+        '🌊 Beach',
+        '🍕 Restaurant',
+        '🚗 Road Trip',
+        '🌅 Anywhere with You'
+    ];
+    
+    const grid = document.getElementById('locationGrid');
+    grid.innerHTML = '';
+    
+    locations.forEach(location => {
+        const btn = document.createElement('button');
+        btn.className = 'location-card';
+        btn.textContent = location;
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            selectLocation(location);
+        });
+        grid.appendChild(btn);
+    });
+}
+
+function startJourney() {
+    if (!musicStarted && audio) {
+        audio.play().catch(() => {});
+        musicStarted = true;
     }
+    setTimeout(() => goToSection(2), 100);
+}
+
+function goToSection(sectionNumber) {
+    const current = document.getElementById(`section${currentSection}`);
+    if (current) current.classList.remove('active');
 
     currentSection = sectionNumber;
 
-    // Show new section
-    const newSectionElement = document.getElementById(`section${sectionNumber}`);
-    if (newSectionElement) {
-        newSectionElement.classList.add('active');
+    const next = document.getElementById(`section${sectionNumber}`);
+    if (next) {
+        next.classList.add('active');
         
-        // Special handling for specific sections
         if (sectionNumber === 3) {
-            startTypewriter();
+            setTimeout(() => startTypewriter(), 100);
         } else if (sectionNumber === 4) {
-            startSlideshow();
+            setTimeout(() => startSlideshow(), 100);
         } else if (sectionNumber === 9) {
             setTimeout(() => {
                 showConfetti();
@@ -87,96 +196,90 @@ function goToSection(sectionNumber) {
     window.scrollTo(0, 0);
 }
 
-// Typewriter Effect
 function startTypewriter() {
-    const typewriterElement = document.getElementById('typewriter');
-    typewriterElement.textContent = '';
-    let index = 0;
-
+    const elem = document.getElementById('typewriter');
+    if (!elem) return;
+    elem.textContent = '';
+    let i = 0;
     function type() {
-        if (index < loveLetterText.length) {
-            typewriterElement.textContent += loveLetterText[index];
-            index++;
+        if (i < loveLetterText.length) {
+            elem.textContent += loveLetterText[i++];
             setTimeout(type, 30);
         }
     }
-
     type();
 }
 
-// Slideshow
 let currentSlide = 0;
 let slideshowInterval;
 
 function startSlideshow() {
     const slides = ['photo1.jpg', 'photo2.jpg', 'photo3.jpg'];
     currentSlide = 0;
-    
     clearInterval(slideshowInterval);
-    document.getElementById('slideshow-image').src = slides[0];
-
-    slideshowInterval = setInterval(() => {
-        currentSlide = (currentSlide + 1) % slides.length;
-        const img = document.getElementById('slideshow-image');
-        img.style.animation = 'none';
-        setTimeout(() => {
-            img.src = slides[currentSlide];
-            img.style.animation = 'fadeInImage 0.8s ease-in';
-        }, 10);
-    }, 3000);
+    const img = document.getElementById('slideshow-image');
+    if (img) {
+        img.src = slides[0];
+        slideshowInterval = setInterval(() => {
+            currentSlide = (currentSlide + 1) % slides.length;
+            img.style.animation = 'none';
+            setTimeout(() => {
+                img.src = slides[currentSlide];
+                img.style.animation = 'fadeInImage 0.8s ease-in';
+            }, 10);
+        }, 3000);
+    }
 }
 
-// Move "Not Yet" Button
 function moveNoButton() {
     const btn = document.getElementById('noBtn');
-    const randomX = Math.random() * 200 - 100;
-    const randomY = Math.random() * 150 - 75;
-    btn.style.transform = `translate(${randomX}px, ${randomY}px)`;
+    const x = Math.random() * 200 - 100;
+    const y = Math.random() * 150 - 75;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
 }
 
-// Activity Selection
 function selectActivity(activity) {
     selectedActivity = activity;
     saveToLocalStorage();
-    document.querySelectorAll('.activity-card').forEach(card => {
-        card.classList.remove('selected');
+    document.querySelectorAll('.activity-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.activity-card').forEach(c => {
+        if (c.textContent === activity) c.classList.add('selected');
     });
-    event.target.classList.add('selected');
     document.getElementById('activityContinue').style.display = 'block';
-    document.getElementById('otherInputContainer').style.display = 'none';
+    const cont = document.getElementById('otherInputContainer');
+    if (cont) cont.style.display = 'none';
 }
 
 function toggleOtherInput() {
-    const container = document.getElementById('otherInputContainer');
-    container.style.display = container.style.display === 'none' ? 'flex' : 'none';
+    const cont = document.getElementById('otherInputContainer');
+    if (cont) cont.style.display = cont.style.display === 'none' ? 'flex' : 'none';
 }
 
 function selectActivityOther() {
     const input = document.getElementById('otherActivityInput');
-    if (input.value.trim()) {
+    if (input && input.value.trim()) {
         selectedActivity = input.value.trim();
         saveToLocalStorage();
         document.getElementById('activityContinue').style.display = 'block';
-        document.getElementById('otherInputContainer').style.display = 'none';
+        const cont = document.getElementById('otherInputContainer');
+        if (cont) cont.style.display = 'none';
     }
 }
 
-// Location Selection
 function selectLocation(location) {
     selectedLocation = location;
     saveToLocalStorage();
-    document.querySelectorAll('.location-card').forEach(card => {
-        card.classList.remove('selected');
+    document.querySelectorAll('.location-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.location-card').forEach(c => {
+        if (c.textContent === location) c.classList.add('selected');
     });
-    event.target.classList.add('selected');
     document.getElementById('locationContinue').style.display = 'block';
 }
 
-// Date Picker Validation
 function validateDateAndContinue() {
-    const datePicker = document.getElementById('datePicker');
-    if (datePicker.value) {
-        selectedDate = datePicker.value;
+    const picker = document.getElementById('datePicker');
+    if (picker && picker.value) {
+        selectedDate = picker.value;
         saveToLocalStorage();
         goToSection(7);
     } else {
@@ -184,19 +287,14 @@ function validateDateAndContinue() {
     }
 }
 
-// Display Summary
 function displaySummary() {
-    const summaryContent = document.getElementById('summaryContent');
+    const content = document.getElementById('summaryContent');
+    if (!content) return;
     const dateObj = new Date(selectedDate);
-    const formattedDate = dateObj.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-
-    let summaryHTML = `
+    const formatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    content.innerHTML = `
         <div style="margin-bottom: 15px;">
-            <strong>📅 Date:</strong><br>${formattedDate}
+            <strong>📅 Date:</strong><br>${formatted}
         </div>
         <div style="margin-bottom: 15px;">
             <strong>Activity:</strong><br>${selectedActivity}
@@ -205,46 +303,30 @@ function displaySummary() {
             <strong>📍 Location:</strong><br>${selectedLocation}
         </div>
     `;
-
-    summaryContent.innerHTML = summaryHTML;
 }
 
-// Confetti Animation
 function showConfetti() {
-    const confettiCount = 50;
-    const container = document.body;
-
-    for (let i = 0; i < confettiCount; i++) {
-        const confetti = document.createElement('div');
-        confetti.className = 'confetti';
-        confetti.style.left = Math.random() * 100 + '%';
-        confetti.style.background = ['#FFB6C1', '#FF69B4', '#FF1493', '#B76E79', '#FFF0F5'][Math.floor(Math.random() * 5)];
-        confetti.style.animationDelay = Math.random() * 0.5 + 's';
-        container.appendChild(confetti);
-
-        setTimeout(() => confetti.remove(), 3500);
+    for (let i = 0; i < 50; i++) {
+        const conf = document.createElement('div');
+        conf.className = 'confetti';
+        conf.style.left = Math.random() * 100 + '%';
+        conf.style.background = ['#FFB6C1', '#FF69B4', '#FF1493', '#B76E79', '#FFF0F5'][Math.floor(Math.random() * 5)];
+        conf.style.animationDelay = Math.random() * 0.5 + 's';
+        conf.style.zIndex = '1000';
+        document.body.appendChild(conf);
+        setTimeout(() => conf.remove(), 3500);
     }
 }
 
-// Final Celebration
 function finalCelebration() {
-    const section = document.getElementById('sectionFinal');
-    section.classList.add('active');
+    document.getElementById('sectionFinal').classList.add('active');
     document.getElementById('section12').classList.remove('active');
-
-    // Create massive celebration
     createHeartExplosion();
     showConfetti();
-    
-    // Loop confetti every 2 seconds
-    setInterval(() => {
-        showConfetti();
-    }, 2000);
+    setInterval(() => showConfetti(), 2000);
 }
 
-// Heart Explosion
 function createHeartExplosion() {
-    const container = document.getElementById('sectionFinal');
     setInterval(() => {
         for (let i = 0; i < 5; i++) {
             const heart = document.createElement('div');
@@ -254,23 +336,23 @@ function createHeartExplosion() {
             heart.style.left = Math.random() * 100 + '%';
             heart.style.top = '100%';
             heart.style.pointerEvents = 'none';
-            heart.style.zIndex = 100;
+            heart.style.zIndex = '100';
             heart.style.animation = `heartFloat ${3 + Math.random() * 2}s ease-out forwards`;
             document.body.appendChild(heart);
-
             setTimeout(() => heart.remove(), 5000);
         }
     }, 300);
 }
 
-// Background Elements
 function initializeBackgroundElements() {
     createFloatingHearts();
     createFallingPetals();
+    createWelcomeHearts();
 }
 
 function createFloatingHearts() {
     const container = document.querySelector('.floating-hearts-container');
+    if (!container) return;
     setInterval(() => {
         const heart = document.createElement('div');
         heart.className = 'heart-particle';
@@ -280,15 +362,14 @@ function createFloatingHearts() {
         heart.style.animationDuration = (5 + Math.random() * 5) + 's';
         heart.style.fontSize = (15 + Math.random() * 20) + 'px';
         container.appendChild(heart);
-
         setTimeout(() => heart.remove(), 10000);
     }, 500);
 }
 
 function createFallingPetals() {
     const container = document.querySelector('.falling-petals');
+    if (!container) return;
     const petals = ['🌹', '🌸', '💐'];
-    
     setInterval(() => {
         const petal = document.createElement('div');
         petal.className = 'petal';
@@ -298,43 +379,50 @@ function createFallingPetals() {
         petal.style.animationDuration = (4 + Math.random() * 4) + 's';
         petal.style.animationDelay = Math.random() * 0.5 + 's';
         container.appendChild(petal);
-
         setTimeout(() => petal.remove(), 8000);
     }, 1000);
 }
 
-// Create Floating Hearts on Welcome Section
-document.addEventListener('DOMContentLoaded', () => {
-    const welcomeHeartsContainer = document.querySelector('.floating-hearts-welcome');
-    if (welcomeHeartsContainer) {
+function createWelcomeHearts() {
+    const cont = document.querySelector('.floating-hearts-welcome');
+    if (cont) {
         for (let i = 0; i < 3; i++) {
             const heart = document.createElement('div');
             heart.className = 'floating-heart';
             heart.textContent = '❤️';
             heart.style.left = (30 + i * 35) + '%';
             heart.style.animationDelay = (i * 0.3) + 's';
-            welcomeHeartsContainer.appendChild(heart);
+            cont.appendChild(heart);
         }
     }
-});
+}
 
-// Local Storage Functions
 function saveToLocalStorage() {
-    const data = {
-        selectedDate,
-        selectedActivity,
-        selectedLocation,
-        currentSection
-    };
-    localStorage.setItem('romanticWebsiteData', JSON.stringify(data));
+    try {
+        localStorage.setItem('romanticWebsiteData', JSON.stringify({
+            selectedDate, selectedActivity, selectedLocation, currentSection
+        }));
+    } catch (e) {}
 }
 
 function loadFromLocalStorage() {
-    const data = localStorage.getItem('romanticWebsiteData');
-    if (data) {
-        const parsed = JSON.parse(data);
-        selectedDate = parsed.selectedDate || '';
-        selectedActivity = parsed.selectedActivity || '';
-        selectedLocation = parsed.selectedLocation || '';
-    }
+    try {
+        const data = localStorage.getItem('romanticWebsiteData');
+        if (data) {
+            const p = JSON.parse(data);
+            selectedDate = p.selectedDate || '';
+            selectedActivity = p.selectedActivity || '';
+            selectedLocation = p.selectedLocation || '';
+        }
+    } catch (e) {}
 }
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes heartFloat {
+        0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.6; }
+        50% { opacity: 0.8; }
+        100% { transform: translateY(-100vh) translateX(100px) rotate(360deg); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
