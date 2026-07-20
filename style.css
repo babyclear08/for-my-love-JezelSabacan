@@ -1,0 +1,40 @@
+:root{
+  --bg1:#ffeef4;
+  --bg2:#ffeff7;
+  --glass-bg: rgba(255,255,255,0.12);
+  --glass-border: rgba(255,255,255,0.25);
+  --accent:#ff77a9;
+  --accent-2:#ffcee1;
+  --text:#3b2230;
+  --muted:#6b4954;
+  --card-radius:16px;
+  --glass-blur:8px;
+  --transition: 400ms cubic-bezier(.2,.9,.2,1);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: radial-gradient(1200px 600px at 10% 10%, var(--bg2), transparent 10%),
+              radial-gradient(800px 400px at 90% 90%, var(--bg1), transparent 10%),
+              linear-gradient(180deg,#fff 0%, #fff0 100%);
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  padding:24px;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  gap:20px;
+  min-height:100vh;
+}
+
+/* glass card */
+.card{
+  background: linear-gradient(135deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.1);
+  
