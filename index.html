@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For Jezel — Baby Clear Jong</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Floating decorations -->
+  <div class="hearts" aria-hidden="true"></div>
+  <div id="petal-wrap" aria-hidden="true"></div>
+
+  <!-- Fake phone notification -->
+  <div id="notification" class="card glass fade-in">
+    <div class="notif-content">
+      <div class="notif-title">New Message from</div>
+      <div class="notif-from">Baby Clear Jong</div>
+    </div>
+    <button id="openBtn" class="btn primary">Open Message</button>
+  </div>
+
+  <!-- Main container -->
+  <main id="app" class="container hidden">
+    <!-- Audio -->
+    <audio id="loveAudio" src="through-the-years.mp3" preload="auto"></audio>
+
+    <!-- Intro message -->
+    <section id="intro" class="card glass section fade-in">
+      <div class="intro-text">
+        <h1 id="greeting">Hi Jezel ❤️</h1>
+        <p id="comfort">I know you are stressed and tired already, so let me do this for you, my love. 😘</p>
+      </div>
+    </section>
+
+    <!-- Typewriter letter -->
+    <section id="letter" class="card glass section fade-in">
+      <h2 class="section-title">A little letter</h2>
+      <p id="typewriter" class="typewriter"></p>
+      
