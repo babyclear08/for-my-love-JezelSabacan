@@ -1,40 +1,201 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>For Jezel — Baby Clear Jong</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Special Message For You ❤️</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Floating decorations -->
-  <div class="hearts" aria-hidden="true"></div>
-  <div id="petal-wrap" aria-hidden="true"></div>
+    <!-- Background elements -->
+    <div class="falling-petals"></div>
+    <div class="floating-hearts-container"></div>
 
-  <!-- Fake phone notification -->
-  <div id="notification" class="card glass fade-in">
-    <div class="notif-content">
-      <div class="notif-title">New Message from</div>
-      <div class="notif-from">Baby Clear Jong</div>
-    </div>
-    <button id="openBtn" class="btn primary">Open Message</button>
-  </div>
-
-  <!-- Main container -->
-  <main id="app" class="container hidden">
     <!-- Audio -->
-    <audio id="loveAudio" src="Through-the-Years.mp3" preload="auto"></audio>
+    <audio id="bgMusic" preload="none">
+        <source src="through-the-years.mp3" type="audio/mpeg">
+    </audio>
 
-    <!-- Intro message -->
-    <section id="intro" class="card glass section fade-in">
-      <div class="intro-text">
-        <h1 id="greeting">Hi Jezel ❤️</h1>
-        <p id="comfort">I know you are stressed and tired already, so let me do this for you, my love. 😘</p>
-      </div>
+    <!-- Section 1: Notification -->
+    <section id="section1" class="section active">
+        <div class="notification-container">
+            <div class="notification-card glassmorphism">
+                <div class="notification-header">
+                    <div class="notification-time">Just now</div>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-icon">📩</div>
+                    <div class="notification-text">
+                        <div class="notification-title">New Message</div>
+                        <div class="notification-from">❤️ Baby Clear Jong</div>
+                        <div class="notification-message">I have something special for you.</div>
+                    </div>
+                </div>
+                <button class="btn-primary notification-btn" onclick="startJourney()">Open Message ❤️</button>
+            </div>
+        </div>
     </section>
 
-    <!-- Typewriter letter -->
-    <section id="letter" class="card glass section fade-in">
-      <h2 class="section-title">A little letter</h2>
-      <p id="typewriter" class="typewriter"></p>
-      
+    <!-- Section 2: Welcome -->
+    <section id="section2" class="section">
+        <div class="welcome-container">
+            <div class="welcome-card glassmorphism">
+                <h1 class="welcome-title">Hi Jezel ❤️</h1>
+                <p class="welcome-message">
+                    I know you are stressed and tired already,<br>
+                    so let me do this for you,<br>
+                    my love. 😘
+                </p>
+                <div class="floating-hearts-welcome"></div>
+            </div>
+            <button class="btn-primary" onclick="goToSection(3)">Continue ❤️</button>
+        </div>
+    </section>
+
+    <!-- Section 3: Love Letter with Typewriter Effect -->
+    <section id="section3" class="section">
+        <div class="letter-container">
+            <div class="letter-card glassmorphism">
+                <div class="letter-content">
+                    <div id="typewriter" class="typewriter-text"></div>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="goToSection(4)" style="margin-top: 20px;">Continue ❤️</button>
+        </div>
+    </section>
+
+    <!-- Section 4: Memory Slideshow -->
+    <section id="section4" class="section">
+        <div class="slideshow-container">
+            <div class="slideshow-wrapper">
+                <img id="slideshow-image" src="photo1.jpg" alt="Our memories" class="slideshow-image">
+                <div class="slideshow-caption">Our Favorite Memories ❤️</div>
+            </div>
+            <button class="btn-primary" onclick="goToSection(5)">Continue ❤️</button>
+        </div>
+    </section>
+
+    <!-- Section 5: Date Proposal -->
+    <section id="section5" class="section">
+        <div class="proposal-container">
+            <h2 class="proposal-title">Will you go on a date with me? ❤️</h2>
+            <div class="proposal-buttons">
+                <button class="btn-yes" onclick="goToSection(6)">❤️ Of Course!</button>
+                <button class="btn-no" id="noBtn" onmouseenter="moveNoButton()" ontouchstart="moveNoButton()" onclick="moveNoButton()">🙈 Not Yet</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Date Picker -->
+    <section id="section6" class="section">
+        <div class="calendar-container">
+            <h2>Choose Our Date ❤️</h2>
+            <input type="date" id="datePicker" class="date-input">
+            <button class="btn-primary" onclick="validateDateAndContinue()">Continue ❤️</button>
+        </div>
+    </section>
+
+    <!-- Section 7: Activity Selection -->
+    <section id="section7" class="section">
+        <div class="activity-container">
+            <h2>What kind of date? ❤️</h2>
+            <div class="activity-grid">
+                <div class="activity-card" onclick="selectActivity('🍝 Romantic Dinner')">🍝 Romantic Dinner</div>
+                <div class="activity-card" onclick="selectActivity('☕ Coffee Date')">☕ Coffee Date</div>
+                <div class="activity-card" onclick="selectActivity('🎬 Movie Date')">🎬 Movie Date</div>
+                <div class="activity-card" onclick="selectActivity('🌅 Sunset Walk')">🌅 Sunset Walk</div>
+                <div class="activity-card" onclick="selectActivity('🌊 Beach Date')">🌊 Beach Date</div>
+                <div class="activity-card" onclick="selectActivity('🍕 Food Trip')">🍕 Food Trip</div>
+                <div class="activity-card" onclick="selectActivity('🚗 Road Trip')">🚗 Road Trip</div>
+                <div class="activity-card" onclick="selectActivity('🎳 Bowling')">🎳 Bowling</div>
+                <div class="activity-card" onclick="selectActivity('🎁 Surprise Me')">🎁 Surprise Me</div>
+                <div class="activity-card" onclick="toggleOtherInput()">✍️ Other</div>
+            </div>
+            <div id="otherInputContainer" class="other-input-container" style="display: none;">
+                <input type="text" id="otherActivityInput" placeholder="Tell me about your perfect date..." class="other-input">
+                <button class="btn-primary" onclick="selectActivityOther()">Confirm</button>
+            </div>
+            <button class="btn-primary" id="activityContinue" onclick="goToSection(8)" style="display: none;">Continue ❤️</button>
+        </div>
+    </section>
+
+    <!-- Section 8: Location Selection -->
+    <section id="section8" class="section">
+        <div class="location-container">
+            <h2>Where should we go? ❤️</h2>
+            <div class="location-grid">
+                <div class="location-card" onclick="selectLocation('❤️ Zaycoland Resort & Hotel')">❤️ Zaycoland Resort & Hotel</div>
+                <div class="location-card" onclick="selectLocation('☕ Coffee Shop')">☕ Coffee Shop</div>
+                <div class="location-card" onclick="selectLocation('🌊 Beach')">🌊 Beach</div>
+                <div class="location-card" onclick="selectLocation('🍕 Restaurant')">🍕 Restaurant</div>
+                <div class="location-card" onclick="selectLocation('🚗 Road Trip')">🚗 Road Trip</div>
+                <div class="location-card" onclick="selectLocation('🌅 Anywhere with You')">🌅 Anywhere with You</div>
+            </div>
+            <button class="btn-primary" id="locationContinue" onclick="goToSection(9)" style="display: none;">Continue ❤️</button>
+        </div>
+    </section>
+
+    <!-- Section 9: Loading Screen -->
+    <section id="section9" class="section loading-section">
+        <div class="loading-container">
+            <div class="loading-text">Loading our next beautiful memory...</div>
+            <div class="loading-hearts">
+                <span class="loading-heart">❤️</span>
+                <span class="loading-heart">❤️</span>
+                <span class="loading-heart">❤️</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 10: Confetti (automatic) -->
+    <section id="section10" class="section confetti-section"></section>
+
+    <!-- Section 11: Final Summary -->
+    <section id="section11" class="section">
+        <div class="summary-container">
+            <h2>❤️ Our Date ❤️</h2>
+            <div class="summary-card glassmorphism">
+                <div id="summaryContent"></div>
+            </div>
+            <p class="summary-message">
+                Thank you for saying yes.<br><br>
+                I know life gets tiring sometimes.<br><br>
+                But whenever I'm with you,<br>
+                I'll always do my best to make you smile.<br><br>
+                No matter where we go,<br>
+                my favorite place will always be by your side.<br><br>
+                Thank you for being my safe place.<br><br>
+                I love you endlessly.<br><br>
+                Forever and always,<br><br>
+                ❤️ Baby Clear Jong
+            </p>
+            <button class="btn-primary" onclick="goToSection(12)">One More Thing... ❤️</button>
+        </div>
+    </section>
+
+    <!-- Section 12: Photo Collage & Final Message -->
+    <section id="section12" class="section">
+        <div class="collage-container">
+            <div class="photo-collage">
+                <img src="photo1.jpg" alt="Our memory 1" class="collage-photo collage-photo-1">
+                <img src="photo2.jpg" alt="Our memory 2" class="collage-photo collage-photo-2">
+                <img src="photo3.jpg" alt="Our memory 3" class="collage-photo collage-photo-3">
+            </div>
+            <p class="final-message">
+                Thank you for being my home.<br><br>
+                Every memory with you is my favorite.<br><br>
+                This is only the beginning of our story.<br><br>
+                I love you forever, Jezel. ❤️
+            </p>
+            <button class="btn-always" onclick="finalCelebration()">❤️ Always ❤️</button>
+        </div>
+    </section>
+
+    <!-- Final Celebration Screen -->
+    <section id="sectionFinal" class="section final-celebration">
+        <div class="final-text">Our greatest adventure is still ahead of us. ❤️</div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
