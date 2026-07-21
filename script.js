@@ -1,38 +1,10 @@
-// Mobile Detection
-function detectMobileDevice() {
-    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|phone/i;
-    const isMobile = mobileRegex.test(userAgent.toLowerCase());
-    const isSmallScreen = window.innerWidth <= 768;
-    const isTouchDevice = () => {
-        return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
-    };
-    return isMobile || (isSmallScreen && isTouchDevice());
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    const isMobileDevice = detectMobileDevice();
-    const desktopBlock = document.getElementById('desktopBlock');
-    const mobileContent = document.getElementById('mobileContent');
-    
-    if (isMobileDevice) {
-        desktopBlock.classList.add('hidden');
-        mobileContent.style.display = 'block';
-        setTimeout(() => initializeWebsite(), 300);
-    } else {
-        desktopBlock.classList.remove('hidden');
-        mobileContent.style.display = 'none';
-    }
-});
-
 // Global State
 let currentSection = 1;
 let selectedDate = '';
 let selectedActivity = '';
 let selectedLocation = '';
 let musicStarted = false;
-const audio = document.getElementById('bgMusic');
+let audio = null;
 
 const loveLetterText = `My Dearest Jezel,
 
@@ -64,147 +36,184 @@ Forever yours,
 
 Baby Clear Jong ❤️`;
 
+// Mobile Detection
+function detectMobileDevice() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|phone/i;
+    const isMobile = mobileRegex.test(userAgent.toLowerCase());
+    const isSmallScreen = window.innerWidth <= 768;
+    const isTouchDevice = () => {
+        return (('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+    };
+    return isMobile || (isSmallScreen && isTouchDevice());
+}
+
+// Initialize on DOM Ready
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded fired');
+    
+    // Get audio element after DOM is ready
+    audio = document.getElementById('bgMusic');
+    console.log('Audio element:', audio);
+    
+    const isMobileDevice = detectMobileDevice();
+    const desktopBlock = document.getElementById('desktopBlock');
+    const mobileContent = document.getElementById('mobileContent');
+    
+    if (isMobileDevice) {
+        desktopBlock.classList.add('hidden');
+        mobileContent.style.display = 'block';
+        setTimeout(() => initializeWebsite(), 300);
+    } else {
+        desktopBlock.classList.remove('hidden');
+        mobileContent.style.display = 'none';
+    }
+});
+
 function initializeWebsite() {
     console.log('Initializing website...');
     setupEventListeners();
     initializeBackgroundElements();
     loadFromLocalStorage();
+    console.log('Website initialized');
 }
 
 function setupEventListeners() {
     console.log('Setting up event listeners...');
     
-    // Open Message button - Special handling
-    const openMessageBtn = document.querySelector('[data-section="2"]');
+    // Open Message button
+    const openMessageBtn = document.querySelector('.notification-btn');
     if (openMessageBtn) {
-        openMessageBtn.addEventListener('click', function(e) {
+        openMessageBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Open Message clicked');
-            startJourney();
+            console.log('✓ Open Message clicked!');
+            playMusicAndGo();
             return false;
-        });
+        };
     }
 
-    // All other section buttons
-    document.querySelectorAll('[data-section]').forEach(btn => {
-        if (btn !== openMessageBtn) {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const section = parseInt(this.getAttribute('data-section'));
-                console.log('Going to section', section);
-                goToSection(section);
-                return false;
-            });
-        }
+    // All continue buttons
+    document.querySelectorAll('[data-section]:not(.notification-btn)').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const section = parseInt(this.getAttribute('data-section'));
+            console.log('Going to section', section);
+            goToSection(section);
+            return false;
+        };
     });
 
-    // Activity buttons
+    // Activity cards
     document.querySelectorAll('.activity-card').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             const activity = this.getAttribute('data-activity');
             if (activity === 'other') {
-                toggleOtherInput();
+                document.getElementById('otherInputContainer').style.display = 'flex';
             } else {
                 selectActivity(activity);
             }
             return false;
-        });
+        };
     });
 
-    // Location buttons
+    // Location cards
     document.querySelectorAll('.location-card').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             selectLocation(this.getAttribute('data-location'));
             return false;
-        });
+        };
     });
 
     // Date button
     const dateBtn = document.getElementById('dateBtn');
     if (dateBtn) {
-        dateBtn.addEventListener('click', function(e) {
+        dateBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             validateDateAndContinue();
             return false;
-        });
+        };
     }
 
     // No button
     const noBtn = document.getElementById('noBtn');
     if (noBtn) {
-        noBtn.addEventListener('click', function(e) {
+        noBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             moveNoButton();
             return false;
-        });
+        };
     }
 
     // Confirm other
     const confirmOther = document.getElementById('confirmOther');
     if (confirmOther) {
-        confirmOther.addEventListener('click', function(e) {
+        confirmOther.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             selectActivityOther();
             return false;
-        });
+        };
     }
 
     // Final button
     const finalBtn = document.getElementById('finalBtn');
     if (finalBtn) {
-        finalBtn.addEventListener('click', function(e) {
+        finalBtn.onclick = function(e) {
             e.preventDefault();
             e.stopPropagation();
             finalCelebration();
             return false;
-        });
+        };
     }
 
-    console.log('Event listeners set up');
+    console.log('✓ Event listeners set up');
 }
 
-function startJourney() {
-    console.log('Starting journey');
+function playMusicAndGo() {
+    console.log('playMusicAndGo called');
     
-    // Play music
-    if (!musicStarted && audio) {
-        console.log('Attempting to play music');
+    // Try to play music
+    if (audio && !musicStarted) {
         try {
+            console.log('Attempting to play audio...');
             audio.currentTime = 0;
             const playPromise = audio.play();
+            
             if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    console.log('Music playing');
-                    musicStarted = true;
-                    audio.loop = true;
-                }).catch(error => {
-                    console.log('Autoplay prevented:', error);
-                    musicStarted = true;
-                });
+                playPromise
+                    .then(() => {
+                        console.log('✓ Music started successfully');
+                        musicStarted = true;
+                        audio.loop = true;
+                    })
+                    .catch(error => {
+                        console.log('✗ Autoplay prevented (normal on some browsers):', error.message);
+                        musicStarted = true;
+                    });
             }
-        } catch (e) {
-            console.log('Error playing music:', e);
+        } catch (error) {
+            console.log('✗ Error playing music:', error);
             musicStarted = true;
         }
     }
     
-    // Navigate to section 2
+    // Go to section 2 after a short delay
     setTimeout(() => {
+        console.log('Navigating to section 2');
         goToSection(2);
-    }, 100);
+    }, 200);
 }
 
 function goToSection(sectionNumber) {
-    console.log('Navigating to section:', sectionNumber);
+    console.log('goToSection:', sectionNumber);
     
     const current = document.getElementById(`section${currentSection}`);
     if (current) {
@@ -216,7 +225,7 @@ function goToSection(sectionNumber) {
     const next = document.getElementById(`section${sectionNumber}`);
     if (next) {
         next.classList.add('active');
-        console.log('Section', sectionNumber, 'is now active');
+        console.log('✓ Section', sectionNumber, 'is active');
         
         if (sectionNumber === 3) {
             setTimeout(() => startTypewriter(), 200);
@@ -493,4 +502,4 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-console.log('Script fully loaded');
+console.log('✓ Script loaded successfully');
