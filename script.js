@@ -11,18 +11,18 @@ function detectMobileDevice() {
 }
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     const isMobileDevice = detectMobileDevice();
     const desktopBlock = document.getElementById('desktopBlock');
     const mobileContent = document.getElementById('mobileContent');
     
     if (isMobileDevice) {
         desktopBlock.classList.add('hidden');
-        mobileContent.classList.remove('hidden');
-        setTimeout(() => initializeWebsite(), 100);
+        mobileContent.style.display = 'block';
+        initializeWebsite();
     } else {
         desktopBlock.classList.remove('hidden');
-        mobileContent.classList.add('hidden');
+        mobileContent.style.display = 'none';
     }
 });
 
@@ -65,8 +65,6 @@ Forever yours,
 Baby Clear Jong ❤️`;
 
 function initializeWebsite() {
-    createActivityGrid();
-    createLocationGrid();
     setupEventListeners();
     initializeBackgroundElements();
     loadFromLocalStorage();
@@ -77,136 +75,63 @@ function setupEventListeners() {
     document.querySelectorAll('[data-section]').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
             const section = parseInt(this.getAttribute('data-section'));
             if (section === 2) {
                 startJourney();
             } else {
                 goToSection(section);
             }
-        }, false);
+        });
     });
 
-    // Special event handlers
-    const dateBtn = document.getElementById('dateBtn');
-    if (dateBtn) dateBtn.addEventListener('click', validateDateAndContinue, false);
-
-    const noBtn = document.getElementById('noBtn');
-    if (noBtn) {
-        noBtn.addEventListener('click', moveNoButton, false);
-        noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            moveNoButton();
-        }, false);
-    }
-
-    const otherActivityBtn = document.getElementById('otherActivityBtn');
-    if (otherActivityBtn) otherActivityBtn.addEventListener('click', toggleOtherInput, false);
-
-    const confirmOther = document.getElementById('confirmOther');
-    if (confirmOther) confirmOther.addEventListener('click', selectActivityOther, false);
-
-    const finalBtn = document.getElementById('finalBtn');
-    if (finalBtn) finalBtn.addEventListener('click', finalCelebration, false);
-
-    const activityContinue = document.getElementById('activityContinue');
-    if (activityContinue) activityContinue.addEventListener('click', () => goToSection(8), false);
-
-    const locationContinue = document.getElementById('locationContinue');
-    if (locationContinue) locationContinue.addEventListener('click', () => goToSection(9), false);
-}
-
-function createActivityGrid() {
-    const activities = [
-        '🍝 Romantic Dinner',
-        '☕ Coffee Date',
-        '🎬 Movie Date',
-        '🌅 Sunset Walk',
-        '🌊 Beach Date',
-        '🍕 Food Trip',
-        '🚗 Road Trip',
-        '🎳 Bowling',
-        '🎁 Surprise Me',
-        '✍️ Other'
-    ];
-    
-    const grid = document.getElementById('activityGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    
-    activities.forEach((activity) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'activity-card';
-        btn.textContent = activity;
-        btn.style.cursor = 'pointer';
-        
+    // Activity buttons
+    document.querySelectorAll('.activity-card').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
-            if (activity === '✍️ Other') {
+            const activity = this.getAttribute('data-activity');
+            if (activity === 'other') {
                 toggleOtherInput();
             } else {
                 selectActivity(activity);
             }
-        }, false);
-        
-        grid.appendChild(btn);
+        });
     });
-}
 
-function createLocationGrid() {
-    const locations = [
-        '❤️ Zaycoland Resort & Hotel',
-        '☕ Coffee Shop',
-        '🌊 Beach',
-        '🍕 Restaurant',
-        '🚗 Road Trip',
-        '🌅 Anywhere with You'
-    ];
-    
-    const grid = document.getElementById('locationGrid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    
-    locations.forEach(location => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'location-card';
-        btn.textContent = location;
-        btn.style.cursor = 'pointer';
-        
+    // Location buttons
+    document.querySelectorAll('.location-card').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            e.stopPropagation();
-            selectLocation(location);
-        }, false);
-        
-        grid.appendChild(btn);
+            selectLocation(this.getAttribute('data-location'));
+        });
     });
+
+    // Special handlers
+    const dateBtn = document.getElementById('dateBtn');
+    if (dateBtn) dateBtn.addEventListener('click', validateDateAndContinue);
+
+    const noBtn = document.getElementById('noBtn');
+    if (noBtn) noBtn.addEventListener('click', moveNoButton);
+
+    const confirmOther = document.getElementById('confirmOther');
+    if (confirmOther) confirmOther.addEventListener('click', selectActivityOther);
+
+    const finalBtn = document.getElementById('finalBtn');
+    if (finalBtn) finalBtn.addEventListener('click', finalCelebration);
 }
 
 function startJourney() {
-    // Play music with proper iOS/Android handling
     if (!musicStarted && audio) {
         try {
             const playPromise = audio.play();
             if (playPromise !== undefined) {
-                playPromise
-                    .then(() => {
-                        console.log('Music playing');
-                        musicStarted = true;
-                        audio.loop = true;
-                    })
-                    .catch((err) => {
-                        console.log('Autoplay prevented:', err);
-                        musicStarted = true;
-                    });
+                playPromise.then(() => {
+                    musicStarted = true;
+                    audio.loop = true;
+                }).catch(() => {
+                    musicStarted = true;
+                });
             }
         } catch (e) {
-            console.log('Error playing music:', e);
             musicStarted = true;
         }
     }
@@ -246,14 +171,17 @@ function goToSection(sectionNumber) {
 function startTypewriter() {
     const elem = document.getElementById('typewriter');
     if (!elem) return;
+    
     elem.textContent = '';
     let i = 0;
+    
     function type() {
         if (i < loveLetterText.length) {
             elem.textContent += loveLetterText[i++];
             setTimeout(type, 30);
         }
     }
+    
     type();
 }
 
@@ -289,23 +217,19 @@ function moveNoButton() {
 function selectActivity(activity) {
     selectedActivity = activity;
     saveToLocalStorage();
+    
+    document.querySelectorAll('.activity-card').forEach(c => c.classList.remove('selected'));
     document.querySelectorAll('.activity-card').forEach(c => {
-        c.classList.remove('selected');
-        if (c.textContent.trim() === activity.trim()) {
-            c.classList.add('selected');
-        }
+        if (c.getAttribute('data-activity') === activity) c.classList.add('selected');
     });
-    const continueBtn = document.getElementById('activityContinue');
-    if (continueBtn) continueBtn.style.display = 'block';
-    const container = document.getElementById('otherInputContainer');
-    if (container) container.style.display = 'none';
+    
+    document.getElementById('activityContinue').style.display = 'block';
+    document.getElementById('otherInputContainer').style.display = 'none';
 }
 
 function toggleOtherInput() {
     const container = document.getElementById('otherInputContainer');
-    if (container) {
-        container.style.display = container.style.display === 'none' || container.style.display === '' ? 'flex' : 'none';
-    }
+    container.style.display = container.style.display === 'none' ? 'flex' : 'none';
 }
 
 function selectActivityOther() {
@@ -313,24 +237,21 @@ function selectActivityOther() {
     if (input && input.value.trim()) {
         selectedActivity = input.value.trim();
         saveToLocalStorage();
-        const continueBtn = document.getElementById('activityContinue');
-        if (continueBtn) continueBtn.style.display = 'block';
-        const container = document.getElementById('otherInputContainer');
-        if (container) container.style.display = 'none';
+        document.getElementById('activityContinue').style.display = 'block';
+        document.getElementById('otherInputContainer').style.display = 'none';
     }
 }
 
 function selectLocation(location) {
     selectedLocation = location;
     saveToLocalStorage();
+    
+    document.querySelectorAll('.location-card').forEach(c => c.classList.remove('selected'));
     document.querySelectorAll('.location-card').forEach(c => {
-        c.classList.remove('selected');
-        if (c.textContent.trim() === location.trim()) {
-            c.classList.add('selected');
-        }
+        if (c.getAttribute('data-location') === location) c.classList.add('selected');
     });
-    const continueBtn = document.getElementById('locationContinue');
-    if (continueBtn) continueBtn.style.display = 'block';
+    
+    document.getElementById('locationContinue').style.display = 'block';
 }
 
 function validateDateAndContinue() {
@@ -347,8 +268,14 @@ function validateDateAndContinue() {
 function displaySummary() {
     const content = document.getElementById('summaryContent');
     if (!content) return;
+    
     const dateObj = new Date(selectedDate);
-    const formatted = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const formatted = dateObj.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
     content.innerHTML = `
         <div style="margin-bottom: 15px;">
             <strong>📅 Date:</strong><br>${formatted}
@@ -363,9 +290,124 @@ function displaySummary() {
 }
 
 function showConfetti() {
-    for (let i = 0; i < 50; i++) {
+    const confettiCount = 50;
+    for (let i = 0; i < confettiCount; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = Math.random() * 100 + '%';
-        confetti.style.background = ['#FFB6C1', '#FF69B4', '#FF1493', '#B76E79', '#FFF0](#)`*
-
+        confetti.style.background = ['#FFB6C1', '#FF69B4', '#FF1493', '#B76E79', '#FFF0F5'][Math.floor(Math.random() * 5)];
+        confetti.style.animationDelay = Math.random() * 0.5 + 's';
+        confetti.style.zIndex = '1000';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 3500);
+    }
+}
+
+function finalCelebration() {
+    document.getElementById('sectionFinal').classList.add('active');
+    document.getElementById('section12').classList.remove('active');
+    createHeartExplosion();
+    showConfetti();
+    setInterval(() => showConfetti(), 2000);
+}
+
+function createHeartExplosion() {
+    setInterval(() => {
+        for (let i = 0; i < 5; i++) {
+            const heart = document.createElement('div');
+            heart.textContent = '❤️';
+            heart.style.position = 'fixed';
+            heart.style.fontSize = Math.random() * 40 + 20 + 'px';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.top = '100%';
+            heart.style.pointerEvents = 'none';
+            heart.style.zIndex = '100';
+            heart.style.animation = `heartFloat ${3 + Math.random() * 2}s ease-out forwards`;
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 5000);
+        }
+    }, 300);
+}
+
+function initializeBackgroundElements() {
+    createFloatingHearts();
+    createFallingPetals();
+    createWelcomeHearts();
+}
+
+function createFloatingHearts() {
+    const container = document.querySelector('.floating-hearts-container');
+    if (!container) return;
+    setInterval(() => {
+        const heart = document.createElement('div');
+        heart.className = 'heart-particle';
+        heart.textContent = '❤️';
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.top = '100%';
+        heart.style.animationDuration = (5 + Math.random() * 5) + 's';
+        heart.style.fontSize = (15 + Math.random() * 20) + 'px';
+        container.appendChild(heart);
+        setTimeout(() => heart.remove(), 10000);
+    }, 500);
+}
+
+function createFallingPetals() {
+    const container = document.querySelector('.falling-petals');
+    if (!container) return;
+    const petals = ['🌹', '🌸', '💐'];
+    setInterval(() => {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.textContent = petals[Math.floor(Math.random() * petals.length)];
+        petal.style.left = Math.random() * 100 + '%';
+        petal.style.top = '-50px';
+        petal.style.animationDuration = (4 + Math.random() * 4) + 's';
+        petal.style.animationDelay = Math.random() * 0.5 + 's';
+        container.appendChild(petal);
+        setTimeout(() => petal.remove(), 8000);
+    }, 1000);
+}
+
+function createWelcomeHearts() {
+    const container = document.querySelector('.floating-hearts-welcome');
+    if (container) {
+        for (let i = 0; i < 3; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = '❤️';
+            heart.style.left = (30 + i * 35) + '%';
+            heart.style.animationDelay = (i * 0.3) + 's';
+            container.appendChild(heart);
+        }
+    }
+}
+
+function saveToLocalStorage() {
+    try {
+        localStorage.setItem('romanticWebsiteData', JSON.stringify({
+            selectedDate, selectedActivity, selectedLocation, currentSection
+        }));
+    } catch (e) {}
+}
+
+function loadFromLocalStorage() {
+    try {
+        const data = localStorage.getItem('romanticWebsiteData');
+        if (data) {
+            const p = JSON.parse(data);
+            selectedDate = p.selectedDate || '';
+            selectedActivity = p.selectedActivity || '';
+            selectedLocation = p.selectedLocation || '';
+        }
+    } catch (e) {}
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes heartFloat {
+        0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.6; }
+        50% { opacity: 0.8; }
+        100% { transform: translateY(-100vh) translateX(100px) rotate(360deg); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
