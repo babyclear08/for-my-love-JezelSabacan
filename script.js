@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isMobileDevice) {
         desktopBlock.classList.add('hidden');
         mobileContent.style.display = 'block';
-        initializeWebsite();
+        setTimeout(() => initializeWebsite(), 300);
     } else {
         desktopBlock.classList.remove('hidden');
         mobileContent.style.display = 'none';
@@ -65,35 +65,53 @@ Forever yours,
 Baby Clear Jong ❤️`;
 
 function initializeWebsite() {
+    console.log('Initializing website...');
     setupEventListeners();
     initializeBackgroundElements();
     loadFromLocalStorage();
 }
 
 function setupEventListeners() {
-    // Section navigation buttons
-    document.querySelectorAll('[data-section]').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+    console.log('Setting up event listeners...');
+    
+    // Open Message button - Special handling
+    const openMessageBtn = document.querySelector('[data-section="2"]');
+    if (openMessageBtn) {
+        openMessageBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const section = parseInt(this.getAttribute('data-section'));
-            if (section === 2) {
-                startJourney();
-            } else {
-                goToSection(section);
-            }
+            e.stopPropagation();
+            console.log('Open Message clicked');
+            startJourney();
+            return false;
         });
+    }
+
+    // All other section buttons
+    document.querySelectorAll('[data-section]').forEach(btn => {
+        if (btn !== openMessageBtn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const section = parseInt(this.getAttribute('data-section'));
+                console.log('Going to section', section);
+                goToSection(section);
+                return false;
+            });
+        }
     });
 
     // Activity buttons
     document.querySelectorAll('.activity-card').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             const activity = this.getAttribute('data-activity');
             if (activity === 'other') {
                 toggleOtherInput();
             } else {
                 selectActivity(activity);
             }
+            return false;
         });
     });
 
@@ -101,65 +119,116 @@ function setupEventListeners() {
     document.querySelectorAll('.location-card').forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             selectLocation(this.getAttribute('data-location'));
+            return false;
         });
     });
 
-    // Special handlers
+    // Date button
     const dateBtn = document.getElementById('dateBtn');
-    if (dateBtn) dateBtn.addEventListener('click', validateDateAndContinue);
+    if (dateBtn) {
+        dateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            validateDateAndContinue();
+            return false;
+        });
+    }
 
+    // No button
     const noBtn = document.getElementById('noBtn');
-    if (noBtn) noBtn.addEventListener('click', moveNoButton);
+    if (noBtn) {
+        noBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            moveNoButton();
+            return false;
+        });
+    }
 
+    // Confirm other
     const confirmOther = document.getElementById('confirmOther');
-    if (confirmOther) confirmOther.addEventListener('click', selectActivityOther);
+    if (confirmOther) {
+        confirmOther.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            selectActivityOther();
+            return false;
+        });
+    }
 
+    // Final button
     const finalBtn = document.getElementById('finalBtn');
-    if (finalBtn) finalBtn.addEventListener('click', finalCelebration);
+    if (finalBtn) {
+        finalBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            finalCelebration();
+            return false;
+        });
+    }
+
+    console.log('Event listeners set up');
 }
 
 function startJourney() {
+    console.log('Starting journey');
+    
+    // Play music
     if (!musicStarted && audio) {
+        console.log('Attempting to play music');
         try {
+            audio.currentTime = 0;
             const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
+                    console.log('Music playing');
                     musicStarted = true;
                     audio.loop = true;
-                }).catch(() => {
+                }).catch(error => {
+                    console.log('Autoplay prevented:', error);
                     musicStarted = true;
                 });
             }
         } catch (e) {
+            console.log('Error playing music:', e);
             musicStarted = true;
         }
     }
     
-    setTimeout(() => goToSection(2), 150);
+    // Navigate to section 2
+    setTimeout(() => {
+        goToSection(2);
+    }, 100);
 }
 
 function goToSection(sectionNumber) {
+    console.log('Navigating to section:', sectionNumber);
+    
     const current = document.getElementById(`section${currentSection}`);
-    if (current) current.classList.remove('active');
+    if (current) {
+        current.classList.remove('active');
+    }
 
     currentSection = sectionNumber;
 
     const next = document.getElementById(`section${sectionNumber}`);
     if (next) {
         next.classList.add('active');
+        console.log('Section', sectionNumber, 'is now active');
         
         if (sectionNumber === 3) {
-            setTimeout(() => startTypewriter(), 100);
+            setTimeout(() => startTypewriter(), 200);
         } else if (sectionNumber === 4) {
-            setTimeout(() => startSlideshow(), 100);
+            setTimeout(() => startSlideshow(), 200);
         } else if (sectionNumber === 9) {
             setTimeout(() => {
                 showConfetti();
-                setTimeout(() => goToSection(10), 1000);
+                setTimeout(() => goToSection(10), 1500);
             }, 2000);
         } else if (sectionNumber === 10) {
-            setTimeout(() => goToSection(11), 2000);
+            setTimeout(() => goToSection(11), 2500);
         } else if (sectionNumber === 11) {
             displaySummary();
         }
@@ -223,13 +292,18 @@ function selectActivity(activity) {
         if (c.getAttribute('data-activity') === activity) c.classList.add('selected');
     });
     
-    document.getElementById('activityContinue').style.display = 'block';
-    document.getElementById('otherInputContainer').style.display = 'none';
+    const continueBtn = document.getElementById('activityContinue');
+    if (continueBtn) continueBtn.style.display = 'block';
+    
+    const container = document.getElementById('otherInputContainer');
+    if (container) container.style.display = 'none';
 }
 
 function toggleOtherInput() {
     const container = document.getElementById('otherInputContainer');
-    container.style.display = container.style.display === 'none' ? 'flex' : 'none';
+    if (container) {
+        container.style.display = container.style.display === 'none' ? 'flex' : 'none';
+    }
 }
 
 function selectActivityOther() {
@@ -237,8 +311,12 @@ function selectActivityOther() {
     if (input && input.value.trim()) {
         selectedActivity = input.value.trim();
         saveToLocalStorage();
-        document.getElementById('activityContinue').style.display = 'block';
-        document.getElementById('otherInputContainer').style.display = 'none';
+        
+        const continueBtn = document.getElementById('activityContinue');
+        if (continueBtn) continueBtn.style.display = 'block';
+        
+        const container = document.getElementById('otherInputContainer');
+        if (container) container.style.display = 'none';
     }
 }
 
@@ -251,7 +329,8 @@ function selectLocation(location) {
         if (c.getAttribute('data-location') === location) c.classList.add('selected');
     });
     
-    document.getElementById('locationContinue').style.display = 'block';
+    const continueBtn = document.getElementById('locationContinue');
+    if (continueBtn) continueBtn.style.display = 'block';
 }
 
 function validateDateAndContinue() {
@@ -304,8 +383,10 @@ function showConfetti() {
 }
 
 function finalCelebration() {
-    document.getElementById('sectionFinal').classList.add('active');
-    document.getElementById('section12').classList.remove('active');
+    const final = document.getElementById('sectionFinal');
+    const section12 = document.getElementById('section12');
+    if (final) final.classList.add('active');
+    if (section12) section12.classList.remove('active');
     createHeartExplosion();
     showConfetti();
     setInterval(() => showConfetti(), 2000);
@@ -411,3 +492,5 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+console.log('Script fully loaded');
