@@ -267,6 +267,22 @@ function moveNoButton() {
     btn.style.transform = `translate(${x}px, ${y}px)`;
 }
 
+// NEW: shows a short animated playful message after "Of Course!" is
+// tapped, then advances to section 6 after the message has had time
+// to be read.
+function celebrateYes() {
+    const msg = document.getElementById('yesMessage');
+    if (msg) {
+        msg.textContent = "Good choice! You can't say no to me, lol 😆";
+        msg.classList.add('show');
+    }
+
+    setTimeout(() => {
+        goToSection(6);
+        if (msg) msg.classList.remove('show');
+    }, 1800);
+}
+
 function selectActivity(activity) {
     selectedActivity = activity;
     saveToLocalStorage();
